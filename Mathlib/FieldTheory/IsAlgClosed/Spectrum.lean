@@ -11,7 +11,7 @@ public import Mathlib.FieldTheory.IsAlgClosed.Basic
 /-!
 # Spectrum mapping theorem
 
-This file develops proves the spectral mapping theorem for polynomials over algebraically closed
+This file develops and proves the spectral mapping theorem for polynomials over algebraically closed
 fields. In particular, if `a` is an element of a `𝕜`-algebra `A` where `𝕜` is a field, and
 `p : 𝕜[X]` is a polynomial, then the spectrum of `Polynomial.aeval a p` contains the image of the
 spectrum of `a` under `(fun k ↦ Polynomial.eval k p)`. When `𝕜` is algebraically closed,
@@ -35,7 +35,7 @@ eigenvalue.
 * `σ a` : `spectrum R a` of `a : A`
 -/
 
-@[expose] public section
+public section
 
 namespace spectrum
 
@@ -129,6 +129,7 @@ theorem pow_image_subset (a : A) (n : ℕ) : (fun x => x ^ n) '' σ a ⊆ σ (a 
 theorem pow_mem_pow (a : A) (n : ℕ) {k : 𝕜} (hk : k ∈ σ a) : k ^ n ∈ σ (a ^ n) :=
   pow_image_subset a n ⟨k, ⟨hk, rfl⟩⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A specialization of `spectrum.map_polynomial_aeval_of_nonempty` to monic monomials for
 convenience. -/
 theorem map_pow_of_pos [IsAlgClosed 𝕜] (a : A) {n : ℕ} (hn : 0 < n) :
@@ -151,7 +152,7 @@ theorem nonempty_of_isAlgClosed_of_finiteDimensional [IsAlgClosed 𝕜] [Nontriv
     [I : FiniteDimensional 𝕜 A] (a : A) : (σ a).Nonempty := by
   obtain ⟨p, ⟨h_mon, h_eval_p⟩⟩ := isIntegral_of_noetherian (IsNoetherian.iff_fg.2 I) a
   have nu : ¬IsUnit (aeval a p) := by rw [← aeval_def] at h_eval_p; rw [h_eval_p]; simp
-  rw [eq_prod_roots_of_monic_of_splits_id h_mon (IsAlgClosed.splits p)] at nu
+  rw [(IsAlgClosed.splits p).eq_prod_roots_of_monic h_mon] at nu
   obtain ⟨k, hk, _⟩ := exists_mem_of_not_isUnit_aeval_prod nu
   exact ⟨k, hk⟩
 
@@ -167,6 +168,7 @@ theorem IsIdempotentElem.spectrum_subset (𝕜 : Type*) {A : Type*} [Field 𝕜]
   refine fun a ha => eq_zero_or_one_of_sq_eq_self ?_
   simpa [pow_two p, hp.eq, sub_eq_zero] using ha
 
+set_option backward.isDefEq.respectTransparency false in
 open Unitization in
 theorem IsIdempotentElem.quasispectrum_subset {𝕜 A : Type*} [Field 𝕜] [NonUnitalRing A] [Module 𝕜 A]
     [IsScalarTower 𝕜 A A] [SMulCommClass 𝕜 A A] {p : A} (hp : IsIdempotentElem p) :

@@ -3,7 +3,7 @@ Copyright (c) 2024 Violeta Hernández Palacios. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Violeta Hernández Palacios
 -/
-module
+module -- shake: keep-all
 
 public import Mathlib.Data.Nat.Bitwise
 public import Mathlib.SetTheory.Ordinal.Family
@@ -142,7 +142,7 @@ protected theorem le_zero {a : Nimber} : a ≤ 0 ↔ a = 0 :=
   nonpos_iff_eq_zero (α := Ordinal)
 
 protected theorem not_lt_zero (a : Nimber) : ¬ a < 0 :=
-  not_neg (α := Ordinal)
+  not_lt_zero (α := Ordinal)
 
 protected theorem pos_iff_ne_zero {a : Nimber} : 0 < a ↔ a ≠ 0 :=
   pos_iff_ne_zero (α := Ordinal)
@@ -163,6 +163,7 @@ instance small_Icc (a b : Nimber.{u}) : Small.{u} (Set.Icc a b) := Ordinal.small
 instance small_Ioo (a b : Nimber.{u}) : Small.{u} (Set.Ioo a b) := Ordinal.small_Ioo a b
 instance small_Ioc (a b : Nimber.{u}) : Small.{u} (Set.Ioc a b) := Ordinal.small_Ioc a b
 
+set_option backward.isDefEq.respectTransparency false in
 theorem not_bddAbove_compl_of_small (s : Set Nimber.{u}) [Small.{u} s] : ¬ BddAbove sᶜ :=
   Ordinal.not_bddAbove_compl_of_small s
 

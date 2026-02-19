@@ -194,10 +194,12 @@ section CommRing
 
 variable {R : Type*} [CommRing R]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma homogenize_neg (p : R[X]) (n : ℕ) : (-p).homogenize n = -p.homogenize n :=
   map_neg (homogenizeLM n) p
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma homogenize_sub (p q : R[X]) (n : ℕ) :
     (p - q).homogenize n = p.homogenize n - q.homogenize n :=
@@ -215,6 +217,6 @@ lemma eval_homogenize {p : K[X]} {n : ℕ} (hn : p.natDegree ≤ n) (x : Fin 2 �
   rw [MvPolynomial.eval_monomial, Finsupp.update_eq_add_single, Finsupp.prod_add_index',
     Finsupp.prod_single_index, Finsupp.prod_single_index, pow_sub₀]
   · ring
-  all_goals simp_all [pow_add, Nat.lt_add_one_iff]
+  all_goals simp_all [pow_add]
 
 end Polynomial

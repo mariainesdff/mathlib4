@@ -56,15 +56,26 @@ theorem sum_nonpos (h : ∀ i ∈ f.support, h₁ i (f i) ≤ 0) : f.sum h₁ �
 
 end OrderedAddCommMonoid
 
+section IsOrderedCancelAddMonoid
+
+variable [AddCommMonoid β] [PartialOrder β] [IsOrderedCancelAddMonoid β]
+variable {f : ι →₀ α} {g : ι → α → β}
+
+theorem sum_pos (h : ∀ i ∈ f.support, 0 < g i (f i)) (hf : f ≠ 0) : 0 < f.sum g :=
+  Finset.sum_pos h (by simpa)
+
+theorem sum_pos' (h : ∀ i ∈ f.support, 0 ≤ g i (f i)) (hf : ∃ i ∈ f.support, 0 < g i (f i)) :
+    0 < f.sum g := Finset.sum_pos' h hf
+
+end IsOrderedCancelAddMonoid
+
 section Preorder
 variable [Preorder α] {f g : ι →₀ α} {i : ι} {a b : α}
 
-@[simp] lemma single_le_single : single i a ≤ single i b ↔ a ≤ b := by
+@[simp, gcongr] lemma single_le_single : single i a ≤ single i b ↔ a ≤ b := by
   classical exact Pi.single_le_single
 
 lemma single_mono : Monotone (single i : α → ι →₀ α) := fun _ _ ↦ single_le_single.2
-
-@[gcongr] protected alias ⟨_, GCongr.single_mono⟩ := single_le_single
 
 @[simp] lemma single_nonneg : 0 ≤ single i a ↔ 0 ≤ a := by classical exact Pi.single_nonneg
 @[simp] lemma single_nonpos : single i a ≤ 0 ↔ a ≤ 0 := by classical exact Pi.single_nonpos
@@ -164,6 +175,7 @@ theorem le_iff' (f g : ι →₀ α) {s : Finset ι} (hf : f.support ⊆ s) : f 
 theorem le_iff (f g : ι →₀ α) : f ≤ g ↔ ∀ i ∈ f.support, f i ≤ g i :=
   le_iff' f g <| Subset.refl _
 
+set_option backward.isDefEq.respectTransparency false in
 lemma support_monotone : Monotone (support (α := ι) (M := α)) :=
   fun f g h a ha ↦ by rw [mem_support_iff, ← pos_iff_ne_zero] at ha ⊢; exact ha.trans_le (h _)
 

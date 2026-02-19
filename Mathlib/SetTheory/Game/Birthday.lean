@@ -3,7 +3,7 @@ Copyright (c) 2022 Violeta Hernández Palacios. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Violeta Hernández Palacios
 -/
-module
+module -- shake: keep-all
 
 public import Mathlib.Algebra.Order.Group.OrderIso
 public import Mathlib.SetTheory.Game.Ordinal
@@ -139,6 +139,7 @@ variable (x : PGame.{u})
 theorem neg_birthday_le : -x.birthday.toPGame ≤ x := by
   simpa only [birthday_neg, ← neg_le_iff] using le_birthday (-x)
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem birthday_add : ∀ x y : PGame.{u}, (x + y).birthday = x.birthday ♯ y.birthday
   | ⟨xl, xr, xL, xR⟩, ⟨yl, yr, yL, yR⟩ => by
@@ -278,13 +279,14 @@ theorem birthday_sub_le (x y : Game) : (x - y).birthday ≤ x.birthday ♯ y.bir
 /- The bound `(x * y).birthday ≤ x.birthday ⨳ y.birthday` is currently an open problem. See
   https://mathoverflow.net/a/476829/147705. -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Games with bounded birthday are a small set. -/
 theorem small_setOf_birthday_lt (o : Ordinal) : Small.{u} {x : Game.{u} // birthday x < o} := by
   induction o using Ordinal.induction with | h o IH =>
   let S := ⋃ a ∈ Set.Iio o, {x : Game.{u} | birthday x < a}
   let H : Small.{u} S := @small_biUnion _ _ _ _ _ IH
   obtain rfl | ⟨a, rfl⟩ | ho := zero_or_succ_or_isSuccLimit o
-  · simp_rw [not_neg]
+  · simp_rw [not_lt_zero]
     exact small_empty
   · simp_rw [Order.lt_succ_iff, le_iff_lt_or_eq]
     convert small_union.{u} {x | birthday x < a} {x | birthday x = a}
