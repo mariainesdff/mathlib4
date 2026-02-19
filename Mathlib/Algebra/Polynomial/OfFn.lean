@@ -88,6 +88,7 @@ theorem ofFn_degree_lt {n : ℕ} (v : Fin n → R) : (ofFn n v).degree < n := by
   · exact (natDegree_lt_iff_degree_lt h).mp
       <| ofFn_natDegree_lt (Nat.one_le_iff_ne_zero.mpr <| ne_zero_of_ofFn_ne_zero h) _
 
+set_option backward.isDefEq.respectTransparency false in
 theorem ofFn_eq_sum_monomial {n : ℕ} (v : Fin n → R) : ofFn n v =
     ∑ i : Fin n, monomial i (v i) := by
   by_cases h : n = 0
@@ -112,7 +113,7 @@ theorem ofFn_comp_toFn_eq_id_of_natDegree_lt {n : ℕ} {p : R[X]} (h_deg : p.nat
   ext i
   by_cases! h : i < n
   · simp [h, toFn]
-  · have : p.coeff i = 0 := coeff_eq_zero_of_natDegree_lt <| by cutsat
+  · have : p.coeff i = 0 := coeff_eq_zero_of_natDegree_lt <| by lia
     simp [*]
 
 end ofFn

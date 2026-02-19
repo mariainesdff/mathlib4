@@ -14,6 +14,7 @@ public import Mathlib.RingTheory.DedekindDomain.Factorization
 public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
 public import Mathlib.RingTheory.Valuation.Archimedean
 public import Mathlib.Topology.Algebra.Valued.NormedValued
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
 
 /-!
 # Finite places of number fields
@@ -62,7 +63,7 @@ instance : IsDiscreteValuationRing (v.valuation K).integer where
       Valuation.Integer.not_isUnit_iff_valuation_lt_one, Ideal.mem_bot, Subtype.forall, not_forall]
     obtain ⟨π, hπ⟩ := v.valuation_exists_uniformizer K
     use π
-    simp [Valuation.mem_integer_iff, ← exp_zero, Subtype.ext_iff, - exp_neg,
+    simp [Valuation.mem_integer_iff, ← exp_zero, Subtype.ext_iff, -exp_neg,
       ← (v.valuation K).map_eq_zero_iff, hπ]
 
 instance : IsPrincipalIdealRing (v.adicCompletionIntegers K) := by
@@ -71,6 +72,7 @@ instance : IsPrincipalIdealRing (v.adicCompletionIntegers K) := by
     WithZero.denselyOrdered_set_iff_subsingleton]
   simpa using Valued.v.range_nontrivial
 
+set_option backward.isDefEq.respectTransparency false in
 -- TODO: make this inferred from `IsRankOneDiscrete`, or
 -- develop the API for a completion of a base `IsDVR` ring
 instance : IsDiscreteValuationRing (v.adicCompletionIntegers K) where
@@ -81,7 +83,7 @@ instance : IsDiscreteValuationRing (v.adicCompletionIntegers K) where
       exists_prop]
     obtain ⟨π, hπ⟩ := v.valuation_exists_uniformizer K
     use π
-    simp [hπ, ← exp_zero, - exp_neg,
+    simp [hπ, ← exp_zero, -exp_neg,
           ← (Valued.v : Valuation (v.adicCompletion K) ℤᵐ⁰).map_eq_zero_iff]
 
 end DVR
@@ -100,7 +102,7 @@ lemma one_lt_absNorm : 1 < absNorm v.asIdeal := by
   have : 0 < absNorm v.asIdeal := by
     rw [Nat.pos_iff_ne_zero, absNorm_ne_zero_iff]
     exact v.asIdeal.finiteQuotientOfFreeOfNeBot v.ne_bot
-  cutsat
+  lia
 
 /-- The norm of a maximal ideal as an element of `ℝ≥0` is `> 1` -/
 lemma one_lt_absNorm_nnreal : 1 < (absNorm v.asIdeal : ℝ≥0) := mod_cast one_lt_absNorm v
@@ -134,24 +136,24 @@ noncomputable def FinitePlace.embedding : WithVal (v.valuation K) →+* adicComp
 
 theorem FinitePlace.embedding_apply (x : K) : embedding v x = ↑x := rfl
 
-noncomputable instance instRankOneValuedAdicCompletion :
-    Valuation.RankOne (Valued.v : Valuation (v.adicCompletion K) ℤᵐ⁰) where
-  hom := {
-    toFun := toNNReal (absNorm_ne_zero v)
-    map_zero' := rfl
-    map_one' := rfl
-    map_mul' := map_mul (toNNReal (absNorm_ne_zero v))
-  }
+noncomputable instance : (v.valuation K).RankOne where
+  hom := toNNReal (absNorm_ne_zero v)
   strictMono' := toNNReal_strictMono (one_lt_absNorm_nnreal v)
   exists_val_nontrivial := by
     rcases Submodule.exists_mem_ne_zero_of_ne_bot v.ne_bot with ⟨x, hx1, hx2⟩
     use x
-    dsimp [adicCompletion]
+    rw [valuation_of_algebraMap]
+    exact ⟨v.intValuation_ne_zero _ hx2, ((intValuation_lt_one_iff_mem _ _).2 hx1).ne⟩
+
+noncomputable instance instRankOneValuedAdicCompletion :
+    Valuation.RankOne (Valued.v : Valuation (v.adicCompletion K) ℤᵐ⁰) where
+  hom := toNNReal (absNorm_ne_zero v)
+  strictMono' := toNNReal_strictMono (one_lt_absNorm_nnreal v)
+  exists_val_nontrivial := by
+    rcases Submodule.exists_mem_ne_zero_of_ne_bot v.ne_bot with ⟨x, hx1, hx2⟩
+    use x
     rw [valuedAdicCompletion_eq_valuation' v (x : K)]
-    constructor
-    · simpa only [ne_eq, map_eq_zero, FaithfulSMul.algebraMap_eq_zero_iff]
-    · apply ne_of_lt
-      rwa [valuation_of_algebraMap, intValuation_lt_one_iff_mem]
+    simpa [valuation_of_algebraMap] using ⟨v.intValuation_ne_zero _ hx2, hx1⟩
 
 /-- The `v`-adic completion of `K` is a normed field. -/
 noncomputable instance instNormedFieldValuedAdicCompletion : NormedField (adicCompletion K v) :=
@@ -169,11 +171,23 @@ noncomputable def FinitePlace.mk (v : HeightOneSpectrum (𝓞 K)) : FinitePlace 
 lemma toNNReal_valued_eq_adicAbv (x : WithVal (v.valuation K)) :
     toNNReal (absNorm_ne_zero v) (Valued.v x) = adicAbv v x := rfl
 
+/-- A predicate singling out finite places among the absolute values on a number field `K`. -/
+def IsFinitePlace (w : AbsoluteValue K ℝ) : Prop :=
+  ∃ v : IsDedekindDomain.HeightOneSpectrum (𝓞 K), place (FinitePlace.embedding v) = w
+
+lemma FinitePlace.isFinitePlace (v : FinitePlace K) : IsFinitePlace v.val := by
+  simp [IsFinitePlace, v.prop]
+
+lemma isFinitePlace_iff (v : AbsoluteValue K ℝ) :
+    IsFinitePlace v ↔ ∃ w : FinitePlace K, w.val = v :=
+  ⟨fun H ↦ ⟨⟨v, H⟩, rfl⟩, fun ⟨w, hw⟩ ↦ hw ▸ w.isFinitePlace⟩
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The norm of the image after the embedding associated to `v` is equal to the `v`-adic absolute
 value. -/
 theorem FinitePlace.norm_def (x : WithVal (v.valuation K)) : ‖embedding v x‖ = adicAbv v x := by
-  simp [NormedField.toNorm, instNormedFieldValuedAdicCompletion, Valued.toNormedField, Valued.norm,
-    Valuation.RankOne.hom, embedding_apply, ← toNNReal_valued_eq_adicAbv]
+  simp +instances [NormedField.toNorm, instNormedFieldValuedAdicCompletion, Valued.toNormedField,
+    Valued.norm, Valuation.RankOne.hom, embedding_apply, ← toNNReal_valued_eq_adicAbv]
 
 /-- The norm of the image after the embedding associated to `v` is equal to the norm of `v` raised
 to the power of the `v`-adic valuation. -/
@@ -212,9 +226,6 @@ theorem FinitePlace.norm_eq_one_iff_notMem (x : 𝓞 (WithVal (v.valuation K))) 
   rw [norm_def]
   exact v.adicAbv_coe_eq_one_iff (one_lt_absNorm_nnreal v) x
 
-@[deprecated (since := "2025-05-23")]
-alias FinitePlace.norm_eq_one_iff_not_mem := FinitePlace.norm_eq_one_iff_notMem
-
 /-- The `v`-adic norm of an integer is less than 1 if and only if it is in the ideal. -/
 theorem FinitePlace.norm_lt_one_iff_mem (x : 𝓞 (WithVal (v.valuation K))) :
     ‖embedding v x‖ < 1 ↔ x ∈ v.asIdeal := by
@@ -241,6 +252,8 @@ instance : NonnegHomClass (FinitePlace K) K ℝ where
 @[simp]
 theorem mk_apply (v : HeightOneSpectrum (𝓞 K)) (x : K) : mk v x = ‖embedding v x‖ := rfl
 
+lemma coe_apply (v : FinitePlace K) (x : K) : v x = v.val x := rfl
+
 /-- For a finite place `w`, return a maximal ideal `v` such that `w = finite_place v` . -/
 noncomputable def maximalIdeal (w : FinitePlace K) : HeightOneSpectrum (𝓞 K) := w.2.choose
 
@@ -254,6 +267,7 @@ theorem norm_embedding_eq (w : FinitePlace K) (x : K) :
 
 theorem pos_iff {w : FinitePlace K} {x : K} : 0 < w x ↔ x ≠ 0 := w.1.pos_iff
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem mk_eq_iff {v₁ v₂ : HeightOneSpectrum (𝓞 K)} : mk v₁ = mk v₂ ↔ v₁ = v₂ := by
   refine ⟨?_, fun a ↦ by rw [a]⟩
@@ -286,6 +300,7 @@ lemma maximalIdeal_injective : (fun w : FinitePlace K ↦ maximalIdeal w).Inject
 lemma maximalIdeal_inj (w₁ w₂ : FinitePlace K) : maximalIdeal w₁ = maximalIdeal w₂ ↔ w₁ = w₂ :=
   equivHeightOneSpectrum.injective.eq_iff
 
+set_option backward.isDefEq.respectTransparency false in
 theorem mulSupport_finite_int {x : 𝓞 K} (h_x_nezero : x ≠ 0) :
     (Function.mulSupport fun w : FinitePlace K ↦ w x).Finite := by
   have (w : FinitePlace K) : w x ≠ 1 ↔ w x < 1 :=
@@ -312,6 +327,18 @@ theorem mulSupport_finite {x : K} (h_x_nezero : x ≠ 0) :
   contrapose!
   simp +contextual only [ne_eq, one_ne_zero, not_false_eq_true, div_self, implies_true]
 
+protected
+lemma add_le (v : FinitePlace K) (x y : K) :
+    v (x + y) ≤ max (v x) (v y) := by
+  obtain ⟨w, hw⟩ := v.prop
+  have H x : v x = RingOfIntegers.HeightOneSpectrum.adicAbv w x := by
+    rw [show v x = v.val x from rfl]
+    grind only [place_apply, norm_def]
+  simpa only [H] using RingOfIntegers.HeightOneSpectrum.adicAbv_add_le_max w x y
+
+instance : NonarchimedeanHomClass (FinitePlace K) K ℝ where
+  map_add_le_max v a b := FinitePlace.add_le v a b
+
 end FinitePlace
 
 end NumberField
@@ -327,6 +354,7 @@ open scoped NumberField
 lemma equivHeightOneSpectrum_symm_apply (v : HeightOneSpectrum (𝓞 K)) (x : K) :
     (equivHeightOneSpectrum.symm v) x = ‖embedding v x‖ := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 open Ideal in
 lemma embedding_mul_absNorm (v : HeightOneSpectrum (𝓞 K)) {x : 𝓞 (WithVal (v.valuation K))}
     (h_x_nezero : x ≠ 0) : ‖embedding v x‖ * absNorm (v.maxPowDividing (span {x})) = 1 := by

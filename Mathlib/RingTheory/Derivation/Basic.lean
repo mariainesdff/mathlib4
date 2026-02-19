@@ -20,10 +20,10 @@ This file defines derivation. A derivation `D` from the `R`-algebra `A` to the `
 - `Derivation.llcomp`: We may compose linear maps and derivations to obtain a derivation,
   and the composition is bilinear.
 
-See `RingTheory.Derivation.Lie` for
-- `derivation.lie_algebra`: The `R`-derivations from `A` to `A` form a lie algebra over `R`.
+See `Mathlib/RingTheory/Derivation/Lie.lean` for
+- `Derivation.instLieAlgebra`: The `R`-derivations from `A` to `A` form a Lie algebra over `R`.
 
-and `RingTheory.Derivation.ToSquareZero` for
+and `Mathlib/RingTheory/Derivation/ToSquareZero.lean` for
 - `derivationToSquareZeroEquivLift`: The `R`-derivations from `A` into a square-zero ideal `I`
   of `B` corresponds to the lifts `A →ₐ[R] B` of the map `A →ₐ[R] B ⧸ I`.
 
@@ -134,6 +134,7 @@ theorem map_algebraMap : D (algebraMap R A r) = 0 := by
 theorem map_natCast (n : ℕ) : D (n : A) = 0 := by
   rw [← nsmul_one, D.map_smul_of_tower n, map_one_eq_zero, smul_zero]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem leibniz_pow (n : ℕ) : D (a ^ n) = n • a ^ (n - 1) • D a := by
   induction n with
@@ -322,11 +323,11 @@ def compAlgebraMap [Algebra A B] [IsScalarTower R A B] [IsScalarTower A B M]
 
 variable (R A B M) in
 /-- For a tower `R → A → B → M`, the precomposition defined in `compAlgebraMap`
-is an `A`-linear map. -/
+is a `B`-linear map. -/
 @[simps!]
 def compAlgebraMapL [Algebra A B] [IsScalarTower R A B] [IsScalarTower A B M]
-    [IsScalarTower R A M] :
-    Derivation R B M →ₗ[A] Derivation R A M where
+    [IsScalarTower R B M] :
+    Derivation R B M →ₗ[B] Derivation R A M where
   toFun d := d.compAlgebraMap A
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
@@ -497,7 +498,7 @@ lemma leibniz_zpow (a : K) (n : ℤ) : D (a ^ n) = n • a ^ (n - 1) • D a := 
     simp only [zpow_natCast, leibniz_pow, natCast_zsmul]
     rw [← zpow_natCast]
     congr
-    cutsat
+    lia
   · rw [h, zpow_neg, zpow_natCast, leibniz_inv, leibniz_pow, inv_pow, ← pow_mul, ← zpow_natCast,
       ← zpow_natCast, ← Nat.cast_smul_eq_nsmul K, ← Int.cast_smul_eq_zsmul K, smul_smul, smul_smul,
       smul_smul]
@@ -506,7 +507,7 @@ lemma leibniz_zpow (a : K) (n : ℤ) : D (a ^ n) = n • a ^ (n - 1) • D a := 
     rw [← zpow_sub₀ ha]
     congr 3
     · norm_cast
-    cutsat
+    lia
 
 end Field
 

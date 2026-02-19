@@ -210,7 +210,7 @@ theorem ofNat'_bit (b n) : ofNat' (Nat.bit b n) = cond b Num.bit1 Num.bit0 (ofNa
   Nat.binaryRec_eq _ _ (.inl rfl)
 
 @[simp]
-theorem ofNat'_one : Num.ofNat' 1 = 1 := by erw [ofNat'_bit true 0, cond, ofNat'_zero]; rfl
+theorem ofNat'_one : Num.ofNat' 1 = 1 := by simp [Num.ofNat', Num.bit1]
 
 theorem bit1_succ : ∀ n : Num, n.bit1.succ = n.succ.bit0
   | 0 => rfl
@@ -297,9 +297,12 @@ end Num
 
 namespace PosNum
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem of_to_nat' : ∀ n : PosNum, Num.ofNat' (n : ℕ) = Num.pos n
-  | 1 => by erw [@Num.ofNat'_bit true 0, Num.ofNat'_zero]; rfl
+  | 1 => by
+      simp only [cast_one, Num.ofNat'_one]
+      norm_cast
   | bit0 p => by
       simpa only [Nat.bit_false, cond_false, two_mul, of_to_nat' p] using Num.ofNat'_bit false p
   | bit1 p => by
@@ -485,11 +488,11 @@ theorem size_to_nat : ∀ n, (size n : ℕ) = Nat.size n
       rw [size, succ_to_nat, size_to_nat n, cast_bit0, ← two_mul, ← Nat.bit_false_apply,
         Nat.size_bit]
       have := to_nat_pos n
-      dsimp [Nat.bit]; cutsat
+      dsimp [Nat.bit]; lia
   | bit1 n => by
       rw [size, succ_to_nat, size_to_nat n, cast_bit1, ← two_mul, ← Nat.bit_true_apply,
         Nat.size_bit]
-      dsimp [Nat.bit]; cutsat
+      dsimp [Nat.bit]; lia
 
 theorem size_eq_natSize : ∀ n, (size n : ℕ) = natSize n
   | 1 => rfl
@@ -561,6 +564,7 @@ instance linearOrder : LinearOrder PosNum where
 @[simp]
 theorem cast_to_num (n : PosNum) : ↑n = Num.pos n := by rw [← cast_to_nat, ← of_to_nat n]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp, norm_cast]
 theorem bit_to_nat (b n) : (bit b n : ℕ) = Nat.bit b n := by cases b <;> simp [bit, two_mul]
 
@@ -617,6 +621,7 @@ variable {α : Type*}
 
 open PosNum
 
+set_option backward.isDefEq.respectTransparency false in
 theorem bit_to_nat (b n) : (bit b n : ℕ) = Nat.bit b n := by
   cases b <;> cases n <;> simp [bit, two_mul] <;> rfl
 
@@ -811,6 +816,7 @@ theorem castNum_ldiff : ∀ m n : Num, (ldiff m n : ℕ) = Nat.ldiff m n := by
 theorem castNum_xor : ∀ m n : Num, ↑(m ^^^ n) = (↑m ^^^ ↑n : ℕ) := by
   apply castNum_eq_bitwise PosNum.lxor <;> intros <;> (try cases_type* Bool) <;> rfl
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp, norm_cast]
 theorem castNum_shiftLeft (m : Num) (n : Nat) : ↑(m <<< n) = (m : ℕ) <<< (n : ℕ) := by
   cases m <;> dsimp only [← shiftl_eq_shiftLeft, shiftl]
@@ -831,7 +837,7 @@ theorem castNum_shiftRight (m : Num) (n : Nat) : ↑(m >>> n) = (m : ℕ) >>> (n
   induction n generalizing m with
   | zero => cases m <;> rfl
   | succ n IH => ?_
-  have hdiv2 : ∀ m, Nat.div2 (m + m) = m := by intro; rw [Nat.div2_val]; omega
+  have hdiv2 : ∀ m, Nat.div2 (m + m) = m := by intro; rw [Nat.div2_val]; lia
   obtain - | m | m := m <;> dsimp only [PosNum.shiftr, ← PosNum.shiftr_eq_shiftRight]
   · rw [Nat.shiftRight_eq_div_pow]
     symm

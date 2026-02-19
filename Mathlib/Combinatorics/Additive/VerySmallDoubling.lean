@@ -83,6 +83,7 @@ lemma op_smul_stabilizer_of_no_doubling (hA : #(A * A) ≤ #A) (ha : a ∈ A) :
 
 /-! ### Doubling strictly less than `3 / 2` -/
 
+set_option backward.isDefEq.respectTransparency false in
 private lemma big_intersection (ha : a ∈ B) (hb : b ∈ B) :
     2 * #A ≤ #((a • A) ∩ (b • A)) + #(B * A) := by
   have : #((a • A) ∪ (b • A)) ≤ #(B * A) := by
@@ -146,10 +147,10 @@ private lemma weaken_doubling (h : #(A * A) < (3 / 2 : ℚ) * #A) : #(A * A) < 2
   linarith only [h]
 
 private lemma nonempty_of_doubling (h : #(A * A) < (3 / 2 : ℚ) * #A) : A.Nonempty := by
-  rw [nonempty_iff_ne_empty]
-  rintro rfl
+  by_contra! rfl
   simp at h
 
+set_option backward.isDefEq.respectTransparency false in
 /-- If `A` has doubling strictly less than `3 / 2`, then `A⁻¹ * A` is a subgroup.
 
 Note that this is sharp: `A = {0, 1}` in `ℤ` has doubling `3 / 2` and `A⁻¹ * A` isn't a subgroup. -/
@@ -313,6 +314,7 @@ lemma smul_inv_mul_eq_inv_mul_opSMul (h : #(A * A) < (3 / 2 : ℚ) * #A) (ha : a
         rw [mul_assoc, ← invMulSubgroup_eq_inv_mul _ h, ← mul_assoc,
           ← invMulSubgroup_eq_inv_mul _ h, ← invMulSubgroup_eq_mul_inv _ h, coe_mul_coe]
 
+set_option backward.isDefEq.respectTransparency false in
 open scoped RightActions in
 /-- If `A` has doubling strictly less than `3 / 2`, then there exists a subgroup `H` of the
 normaliser of `A` of size strictly less than `3 / 2 * #A` such that `A` is a subset of a coset of
@@ -373,6 +375,7 @@ private lemma card_mul_eq_mul_card_of_injOn_opSMul {H : Subgroup G} [Fintype H]
     simpa [eq_inv_mul_iff_mul_eq.2 h, mul_assoc] using mul_mem (inv_mem hh₂) hh₁
   simp_all
 
+set_option backward.isDefEq.respectTransparency false in
 set_option linter.flexible false in -- simp followed by positivity
 open goldenRatio in
 /-- If `A` has doubling `K` strictly less than `φ`, then `A * A⁻¹` is covered by
@@ -453,7 +456,7 @@ theorem doubling_lt_golden_ratio (hK₁ : 1 < K) (hKφ : K < φ)
           · simp_all
         _ = l * #A + (#S - l) * (K - 1) * #A := by
           simp [hk, ← not_lt, mul_assoc,
-            ← S.filter_card_add_filter_neg_card_eq_card fun z ↦ (K - 1) * #A < r z]
+            ← S.card_filter_add_card_filter_not fun z ↦ (K - 1) * #A < r z]
         _ = ((2 - K) * l + (K - 1) * #S) * #A := by ring
     -- By cancelling `|A|` on both sides, we get `|A| ≤ (2 - K)l + (K - 1)|S|`.
     -- By composing with `|S| ≤ K|A|`, we get `|S| ≤ (2 - K)Kl + (K - 1)K|S|`.
@@ -528,7 +531,7 @@ private lemma mul_card_le_expansion (hS : S.Nonempty) : (1 - K) * #A ≤ expansi
 
 @[simp] private lemma expansion_pos_iff (hK : K < 1) (hS : S.Nonempty) :
     0 < expansion K S A ↔ A.Nonempty where
-  mp hA := by rw [nonempty_iff_ne_empty]; rintro rfl; simp at hA
+  mp hA := by by_contra! rfl; simp at hA
   mpr := expansion_pos hK hS
 
 @[simp] private lemma expansion_smul_finset (K : ℝ) (S A : Finset G) (a : G) :
@@ -610,6 +613,8 @@ private lemma IsAtom.eq_of_inter_nonempty (hK : K ≤ 1) (hS : S.Nonempty)
   replace hB := eq_of_subset_of_card_le inter_subset_right hB
   exact hA.symm.trans hB
 
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.style.whitespace false in -- manual alignment is not recognised
 /-- For `K < 1` and `S ⊆ G` finite and nonempty, the value of connectivity is attained by a
 nonempty finite subset of `G`. That is, a fragment for given `K` and `S` exists. -/
 private lemma exists_nonempty_isFragment (hK : K < 1) (hS : S.Nonempty) :
@@ -676,8 +681,7 @@ private lemma not_isFragment_empty (hK : K < 1) (hS : S.Nonempty) : ¬ IsFragmen
 
 private lemma IsFragment.nonempty (hK : K < 1) (hS : S.Nonempty) (hA : IsFragment K S A) :
     A.Nonempty := by
-  rw [nonempty_iff_ne_empty]
-  rintro rfl
+  by_contra! rfl
   simp [*, not_isFragment_empty hK hS] at hA
 
 private lemma IsAtom.nonempty (hK : K < 1) (hS : S.Nonempty) (hA : IsAtom K S A) : A.Nonempty :=
@@ -719,6 +723,8 @@ private lemma exists_subgroup_isAtom (hK : K < 1) (hS : S.Nonempty) :
   · simpa only [← mem_coe, coe_smul_finset] using H.mem_carrier
   · simpa [Set.toFinset_smul_set, toFinset_coe, H] using IsAtom.smul_finset n⁻¹ hN
 
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.style.whitespace false in -- manual alignment is not recognised
 /-- If `S` is nonempty such that there is `A` with `|S| ≤ |A|` such that `|A * S| ≤ (2 - ε) * |S|`
 for some `0 < ε ≤ 1`, then there is a finite subgroup `H` of `G` of size `|H| ≤ (2 / ε - 1) * |S|`
 such that `S` is covered by at most `2 / ε - 1` right cosets of `H`. -/
@@ -775,7 +781,7 @@ theorem card_mul_finset_lt_two {ε : ℝ} (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) 
     -- where we used `calc₁` again.
     rw [← mul_le_mul_iff_right₀ (show 0 < 1 - K by linarith [hK])]
     suffices (1 - K) * #(Set.toFinset H * S) ≤ (1 - ε / 2) * #(H : Set G).toFinset by
-      apply le_of_eq_of_le' _ this; simp [K]; field
+      apply le_of_le_of_eq this; simp [K]; field
     rw [sub_mul, one_mul, sub_le_iff_le_add]
     calc
           (#(Set.toFinset H * S) : ℝ)
