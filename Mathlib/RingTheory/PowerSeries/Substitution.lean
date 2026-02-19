@@ -376,17 +376,12 @@ lemma rescale_eq_subst (r : R) (f : PowerSeries R) :
 noncomputable abbrev rescaleAlgHom (r : R) : R⟦X⟧ →ₐ[R] R⟦X⟧ :=
   MvPowerSeries.rescaleAlgHom (fun _ ↦ r)
 
-lemma rescaleAlgHom_def (r : R) (f : PowerSeries R) :
-    rescaleAlgHom r f = MvPowerSeries.rescaleAlgHom (fun _ ↦ r) f := by
-  simp only [rescaleAlgHom]
-
-theorem rescaleAlgHom_apply (r : R) : rescaleAlgHom r = rescale r := by
+theorem coe_rescaleAlgHom (r : R) : rescaleAlgHom r = rescale r := by
   ext f
-  rw [rescale_eq, RingHom.coe_coe, rescaleAlgHom_def, MvPowerSeries.rescaleAlgHom_apply]
+  rw [rescale_eq, RingHom.coe_coe, MvPowerSeries.rescaleAlgHom_apply]
 
-/-- When `p` is linear, substitution of `p` and then a scalar homothety is substitution of
-the homothety then `p`. -/
-lemma subst_linear_subst_scalar_comm (a : R) {σ : Type*} (p : MvPowerSeries σ R)
+/-- Substitution by `p` commutes with scalar homothety. -/
+lemma subst_rescale_of_degree_eq_one (a : R) {σ : Type*} (p : MvPowerSeries σ R)
     (hp_lin : ∀ d ∈ Function.support p, d.degree = 1) (f : PowerSeries R) :
     subst p (rescale a f) = MvPowerSeries.rescale (Function.const σ a) (subst p f) := by
   have hp : PowerSeries.HasSubst p := by
