@@ -25,13 +25,14 @@ noncomputable section
 
 open Multiplicative RatFunc WithZero
 
-lemma FiniteField.valuation_algebraMap_eq_one {Fq A Γ₀ : Type*} [Field Fq] [Fintype Fq]
+-- TODO: get from #35531
+lemma FiniteField.valuation_algebraMap_eq_one {Fq A Γ₀ : Type*} [Field Fq] [Finite Fq]
     [Ring A] [Algebra Fq A] [LinearOrderedCommMonoidWithZero Γ₀] (v : Valuation A Γ₀) (a : Fq)
     (ha : a ≠ 0) : v ((algebraMap Fq A) a) = 1 := by
+  have : Fintype Fq := Fintype.ofFinite Fq
   have hpow : (v ((algebraMap Fq A) a)) ^ (Fintype.card Fq - 1) = 1 := by
     simp [← map_pow, pow_card_sub_one_eq_one a ha]
-  refine (pow_eq_one_iff ?_).mp hpow
-  grind [Fintype.one_lt_card]
+  grind [pow_eq_one_iff, → IsPrimePow.two_le, FiniteField.isPrimePow_card]
 
 variable {Fq Γ : Type*} [Field Fq] [LinearOrderedCommGroupWithZero Γ]
   {v : Valuation (RatFunc Fq) Γ}
@@ -73,7 +74,6 @@ theorem setOf_polynomial_valuation_lt_one_and_ne_zero_nonempty [v.IsNontrivial]
     (h : ∀ a : Fq, a ≠ 0 → v (algebraMap Fq (RatFunc Fq) a) = 1) (hle : v RatFunc.X ≤ 1) :
     {p : Fq[X] | v p < 1 ∧ p ≠ 0}.Nonempty := by
   obtain ⟨w , h0, h1⟩ := IsNontrivial.exists_lt_one (v := v)
-  rw [Valuation.ne_zero_iff] at h0
   induction w using RatFunc.induction_on with
   | f p q =>
     simp only [ne_eq, RatFunc.algebraMap_eq_C, _root_.div_eq_zero_iff,
@@ -298,9 +298,9 @@ theorem valuation_isEquiv_adic_of_not_isEquiv_infty [DecidableEq (RatFunc Fq)]
     ∃! (u : HeightOneSpectrum Fq[X]), v.IsEquiv (u.valuation _) :=
   (valuation_isEquiv_infty_or_adic h).or.resolve_left hni
 
-section Fintype
+section Finite
 
-variable [Fintype Fq]
+variable [Finite Fq]
 
 variable (v) in
 /-- Ostrowski's Theorem for `Fq(t)` with `Fq` a finite field. -/
@@ -314,7 +314,7 @@ theorem valuation_isEquiv_adic_of_not_isEquiv_infty_of_fintype [DecidableEq (Rat
     ∃! (u : HeightOneSpectrum Fq[X]), v.IsEquiv (u.valuation _) :=
   (valuation_isEquiv_infty_or_adic_of_fintype v).or.resolve_left hv
 
-end Fintype
+end Finite
 
 end Discrete
 
