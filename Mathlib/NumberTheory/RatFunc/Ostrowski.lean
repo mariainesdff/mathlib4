@@ -3,9 +3,11 @@ Copyright (c) 2025 María Inés de Frutos-Fernández & Xavier Généreux. All ri
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: María Inés de Frutos-Fernández, Xavier Généreux
 -/
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.NumberTheory.FunctionField
-import Mathlib.RingTheory.Valuation.Discrete.Basic
+module
+
+public import Mathlib.FieldTheory.Finite.Valuation
+public import Mathlib.NumberTheory.FunctionField
+public import Mathlib.RingTheory.Valuation.Discrete.Basic
 
 /-!
 # Ostrowski's theorem for `K(X)`
@@ -20,6 +22,8 @@ valuation at infinity `FunctionField.inftyValuation Fq`.
 - `RatFunc.valuation_isEquiv_infty_or_adic_of_fintype`: Ostrowski's theorem for `Fq(X)`, where `Fq`
 is a finite field.
 -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,7 +91,7 @@ private lemma one_le_valuation_factor (hne : {p : Fq[X] | v p < 1 ∧ p ≠ 0}.N
   have hlea := imp_not_comm.mp (degree_lt_wf.not_lt_min _ hne) hda
   grind
 
-private theorem irreducible_min_polynomial_valuation_lt_one_and_ne_zero
+theorem irreducible_min_polynomial_valuation_lt_one_and_ne_zero
     (hne : {p : Fq[X] | v p < 1 ∧ p ≠ 0}.Nonempty)
     (h : ∀ a : Fq, a ≠ 0 → v (algebraMap Fq (RatFunc Fq) a) = 1) :
     Irreducible (degree_lt_wf.min {p : Fq[X] | v p < 1 ∧ p ≠ 0} hne) := by
