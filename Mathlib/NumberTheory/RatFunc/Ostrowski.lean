@@ -25,15 +25,6 @@ noncomputable section
 
 open Multiplicative RatFunc WithZero
 
--- TODO: get from #35531
-lemma FiniteField.valuation_algebraMap_eq_one {Fq A Γ₀ : Type*} [Field Fq] [Finite Fq]
-    [Ring A] [Algebra Fq A] [LinearOrderedCommMonoidWithZero Γ₀] (v : Valuation A Γ₀) (a : Fq)
-    (ha : a ≠ 0) : v ((algebraMap Fq A) a) = 1 := by
-  have : Fintype Fq := Fintype.ofFinite Fq
-  have hpow : (v ((algebraMap Fq A) a)) ^ (Fintype.card Fq - 1) = 1 := by
-    simp [← map_pow, pow_card_sub_one_eq_one a ha]
-  grind [pow_eq_one_iff, → IsPrimePow.two_le, FiniteField.isPrimePow_card]
-
 variable {Fq Γ : Type*} [Field Fq] [LinearOrderedCommGroupWithZero Γ]
   {v : Valuation (RatFunc Fq) Γ}
 
