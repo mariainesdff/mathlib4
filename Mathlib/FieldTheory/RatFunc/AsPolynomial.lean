@@ -90,7 +90,7 @@ theorem aeval_X_left_eq_algebraMap (p : K[X]) :
   induction p using Polynomial.induction_on' <;> simp_all
 
 @[simp]
-theorem coe_polynomial_eq_algebraMap (p : K[X]) :
+theorem coePolynomial_eq_algebraMap (p : K[X]) :
     (p : RatFunc K) = algebraMap (Polynomial K) (RatFunc K) p := rfl
 
 @[simp]

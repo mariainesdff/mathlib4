@@ -37,19 +37,19 @@ section Infinity
 
 open FunctionField Polynomial Valuation
 
-theorem valuation_eq_valuation_X_zpow_intDegree_of_one_lt_valuation_X {f : RatFunc K}
+lemma valuation_eq_valuation_X_zpow_intDegree_of_one_lt_valuation_X {f : RatFunc K}
     [v.IsTrivialOn K] (hlt : 1 < v X) (hf : f ≠ 0) : v f = v RatFunc.X ^ f.intDegree := by
   induction f using RatFunc.induction_on with
   | f p q hq =>
     rw [intDegree_div (by grind only) (by grind only), v.map_div, zpow_sub₀ (ne_zero_of_lt hlt)]
-    simp_rw [intDegree_polynomial, zpow_natCast, ← coe_polynomial_eq_algebraMap]
+    simp_rw [intDegree_polynomial, zpow_natCast, ← coePolynomial_eq_algebraMap]
     have hp : p ≠ 0  := by contrapose! hf; simp [hf]
     rw [valuation_eq_valuation_X_pow_natDegree_of_one_lt_valuation_X _ hlt hp,
       valuation_eq_valuation_X_pow_natDegree_of_one_lt_valuation_X _ hlt hq]
 
 variable [DecidableEq (RatFunc K)]
 
-theorem valuation_isEquiv_inftyValuation_of_one_lt_valuation_X [v.IsTrivialOn K] (hlt : 1 < v X) :
+lemma valuation_isEquiv_inftyValuation_of_one_lt_valuation_X [v.IsTrivialOn K] (hlt : 1 < v X) :
     v.IsEquiv (inftyValuation K) := by
   refine isEquiv_iff_val_lt_one.mpr fun {f} ↦ ?_
   rcases eq_or_ne f 0 with rfl | hf
@@ -63,7 +63,7 @@ end Infinity
 
 open IsDedekindDomain HeightOneSpectrum Set Valuation FunctionField Polynomial
 
-theorem setOf_polynomial_valuation_lt_one_and_ne_zero_nonempty [v.IsNontrivial] [v.IsTrivialOn K]
+lemma setOf_polynomial_valuation_lt_one_and_ne_zero_nonempty [v.IsNontrivial] [v.IsTrivialOn K]
     (hle : v RatFunc.X ≤ 1) : {p : K[X] | v p < 1 ∧ p ≠ 0}.Nonempty := by
   obtain ⟨w , h0, h1⟩ := IsNontrivial.exists_lt_one (v := v)
   induction w using RatFunc.induction_on with
@@ -88,7 +88,7 @@ private lemma one_le_valuation_factor (hne : {p : K[X] | v p < 1 ∧ p ≠ 0}.No
   have hlea := imp_not_comm.mp (degree_lt_wf.not_lt_min _ hne) hda
   grind
 
-theorem irreducible_min_polynomial_valuation_lt_one_and_ne_zero [v.IsTrivialOn K]
+lemma irreducible_min_polynomial_valuation_lt_one_and_ne_zero [v.IsTrivialOn K]
     (hne : {p : K[X] | v p < 1 ∧ p ≠ 0}.Nonempty) :
     Irreducible (degree_lt_wf.min {p : K[X] | v p < 1 ∧ p ≠ 0} hne) := by
   set πᵥ := degree_lt_wf.min _ hne
@@ -103,7 +103,7 @@ theorem irreducible_min_polynomial_valuation_lt_one_and_ne_zero [v.IsTrivialOn K
     have hva := one_le_valuation_factor hne hπᵥ hab H.2
     simp only [mul_comm a b, @and_comm (¬a = 0)] at hπᵥ hab
     have := Right.one_le_mul (one_le_valuation_factor hne hπᵥ hab H.1) hva
-    simp only [coe_polynomial_eq_algebraMap, map_mul] at hπᵥ this
+    simp only [coePolynomial_eq_algebraMap, map_mul] at hπᵥ this
     grind
 
 section valuation_X_le_one
@@ -141,7 +141,7 @@ local notation "Pᵥ" => RatFunc.valuationIdeal hle
 section Associates
 
 open EuclideanDomain in
-theorem valuation_eq_valuation_uniformizingPolynomial_pow_of_valuation_X_le_one
+lemma valuation_eq_valuation_uniformizingPolynomial_pow_of_valuation_X_le_one
     [DecidableEq (Associates (Ideal K[X]))]
     [(p : Associates (Ideal K[X])) → Decidable (Irreducible p)] {p : K[X]} (hp : p ≠ 0) :
     v (algebraMap K[X] (RatFunc K) p) = v (πᵥ ^ ((Associates.mk (Pᵥ).asIdeal).count
@@ -166,12 +166,12 @@ theorem valuation_eq_valuation_uniformizingPolynomial_pow_of_valuation_X_le_one
     rw [← h₁] at h₂ ⊢
     exact Valuation.map_add_eq_of_lt_left _ h₂
   constructor
-  · rw [← coe_polynomial_eq_algebraMap]
+  · rw [← coePolynomial_eq_algebraMap]
     have hnπ : q % π ∉ _ :=
       imp_not_comm.mp (degree_lt_wf.not_lt_min _ hne) (EuclideanDomain.remainder_lt q hπ.2)
     have := Polynomial.valuation_le_one_of_valuation_X_le_one _ hle (q % π)
     grind
-  · simpa only [map_mul, ← coe_polynomial_eq_algebraMap]
+  · simpa only [map_mul, ← coePolynomial_eq_algebraMap]
       using mul_lt_one_of_lt_of_le hπ.1 <| (q / π).valuation_le_one_of_valuation_X_le_one _ hle
 
 lemma exists_zpow_uniformizingPolynomial [IsRankOneDiscrete v] {f : RatFunc K} (hf : f ≠ 0) :
@@ -187,7 +187,7 @@ lemma exists_zpow_uniformizingPolynomial [IsRankOneDiscrete v] {f : RatFunc K} (
       valuation_eq_valuation_uniformizingPolynomial_pow_of_valuation_X_le_one hle
         (p := p) (by aesop)]
 
-theorem uniformizingPolynomial_isUniformizer [hv : IsRankOneDiscrete v] :
+lemma uniformizingPolynomial_isUniformizer [hv : IsRankOneDiscrete v] :
     v.IsUniformizer πᵥ := by
   classical
   have h0 : v πᵥ ≠ 0 := by simpa using uniformizingPolynomial_ne_zero hle
@@ -196,7 +196,7 @@ theorem uniformizingPolynomial_isUniformizer [hv : IsRankOneDiscrete v] :
   · rw [← Units.val_lt_val, h0.isUnit.unit_spec, Units.val_one]
     exact valuation_uniformizingPolynomial_lt_one hle
   · ext γ
-    simp only [coe_polynomial_eq_algebraMap, MonoidWithZeroHom.mem_valueGroup_iff_of_comm, ne_eq,
+    simp only [coePolynomial_eq_algebraMap, MonoidWithZeroHom.mem_valueGroup_iff_of_comm, ne_eq,
       map_eq_zero, Subgroup.mem_zpowers_iff]
     refine ⟨fun ⟨k, hk⟩ ↦ ?_, fun ⟨a, ha, b, hab⟩ ↦ ?_⟩
     · use 1, one_ne_zero, πᵥ ^ k
@@ -210,7 +210,7 @@ theorem uniformizingPolynomial_isUniformizer [hv : IsRankOneDiscrete v] :
         h0.isUnit.unit_spec, Units.val_inv_eq_inv_val, ← hab]
       rw [mul_comm (v _ ^ _), mul_assoc, mul_inv_cancel₀ (zpow_ne_zero _ h0), mul_one]
 
-theorem valuation_isEquiv_valuationIdeal_adic_of_valuation_X_le_one [IsRankOneDiscrete v] :
+lemma valuation_isEquiv_valuationIdeal_adic_of_valuation_X_le_one [IsRankOneDiscrete v] :
     v.IsEquiv ((Pᵥ).valuation (RatFunc K)) := by
   classical
   rw [isEquiv_iff_val_le_one]
@@ -233,7 +233,7 @@ end Associates
 
 end valuation_X_le_one
 
-theorem adicValuation_not_isEquiv_infty_valuation [DecidableEq (RatFunc K)]
+lemma adicValuation_not_isEquiv_infty_valuation [DecidableEq (RatFunc K)]
     (p : IsDedekindDomain.HeightOneSpectrum K[X]) :
     ¬ (p.valuation (RatFunc K)).IsEquiv (inftyValuation K) := by
   simp only [isEquiv_iff_val_lt_one, not_forall]
@@ -248,7 +248,7 @@ theorem adicValuation_not_isEquiv_infty_valuation [DecidableEq (RatFunc K)]
       p.valuation_le_one (Polynomial.X)⟩
   tauto
 
-theorem adicValuation_ne_inftyValuation [DecidableEq (RatFunc K)]
+lemma adicValuation_ne_inftyValuation [DecidableEq (RatFunc K)]
    (p : IsDedekindDomain.HeightOneSpectrum K[X]) :
     p.valuation (RatFunc K) ≠ inftyValuation K := by
   by_contra h
@@ -262,7 +262,7 @@ section IsTrivialOn
 
 variable [v.IsTrivialOn K]
 
-theorem valuation_isEquiv_adic_of_valuation_X_le_one (hle : v X ≤ 1) :
+lemma valuation_isEquiv_adic_of_valuation_X_le_one (hle : v X ≤ 1) :
     ∃ (u : HeightOneSpectrum K[X]), v.IsEquiv (u.valuation _) := by
   classical exact ⟨RatFunc.valuationIdeal hle,
     valuation_isEquiv_valuationIdeal_adic_of_valuation_X_le_one hle⟩
@@ -285,7 +285,7 @@ theorem valuation_isEquiv_infty_or_adic [DecidableEq (RatFunc K)] :
     exact ⟨⟨pw, hw, fun pw' hw' ↦ eq_of_valuation_isEquiv_valuation (hw'.symm.trans hw)⟩,
       fun hv ↦ absurd (hw.symm.trans hv) (RatFunc.adicValuation_not_isEquiv_infty_valuation pw)⟩
 
-theorem valuation_isEquiv_adic_of_not_isEquiv_infty [DecidableEq (RatFunc K)]
+lemma valuation_isEquiv_adic_of_not_isEquiv_infty [DecidableEq (RatFunc K)]
     (hni : ¬ v.IsEquiv (FunctionField.inftyValuation K)) :
     ∃! (u : HeightOneSpectrum K[X]), v.IsEquiv (u.valuation _) :=
   valuation_isEquiv_infty_or_adic.or.resolve_left hni
@@ -303,7 +303,7 @@ theorem valuation_isEquiv_infty_or_adic_of_fintype [DecidableEq (RatFunc K)] :
       (∃! (u : HeightOneSpectrum K[X]), v.IsEquiv (u.valuation _)) :=
   valuation_isEquiv_infty_or_adic
 
-theorem valuation_isEquiv_adic_of_not_isEquiv_infty_of_fintype [DecidableEq (RatFunc K)]
+lemma valuation_isEquiv_adic_of_not_isEquiv_infty_of_fintype [DecidableEq (RatFunc K)]
     (hv : ¬ v.IsEquiv (FunctionField.inftyValuation K)) :
     ∃! (u : HeightOneSpectrum K[X]), v.IsEquiv (u.valuation _) :=
   (valuation_isEquiv_infty_or_adic_of_fintype v).or.resolve_left hv
