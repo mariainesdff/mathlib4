@@ -174,7 +174,7 @@ lemma valuation_eq_valuation_uniformizingPolynomial_pow_of_valuation_X_le_one
   · simpa only [map_mul, ← coePolynomial_eq_algebraMap]
       using mul_lt_one_of_lt_of_le hπ.1 <| (q / π).valuation_le_one_of_valuation_X_le_one _ hle
 
-lemma exists_zpow_uniformizingPolynomial [IsRankOneDiscrete v] {f : RatFunc K} (hf : f ≠ 0) :
+lemma exists_zpow_uniformizingPolynomial {f : RatFunc K} (hf : f ≠ 0) :
     ∃ (z : ℤ), v f = v πᵥ ^ z:= by
   classical
   have h0 : v πᵥ ≠ 0 := by simpa using uniformizingPolynomial_ne_zero hle
