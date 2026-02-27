@@ -361,12 +361,13 @@ theorem subst_comp_subst_apply (ha : HasSubst a) (hb : HasSubst b) (f : PowerSer
     subst b (subst a f) = subst (subst b a) f :=
   congr_fun (subst_comp_subst ha hb) f
 
-set_option backward.isDefEq.respectTransparency false in
 lemma rescale_eq (r : R) (f : PowerSeries R) :
     rescale r f = MvPowerSeries.rescale (fun _ ↦ r) f := by
   ext n
   rw [coeff_rescale, coeff, MvPowerSeries.coeff_rescale]
   simp [pow_zero, Finsupp.prod_single_index]
+
+@[deprecated (since := "2026-02-27")] alias _root_.MvPowerSeries.rescaleUnit := rescale_eq
 
 lemma rescale_eq_subst (r : R) (f : PowerSeries R) :
     PowerSeries.rescale r f = PowerSeries.subst (r • X : R⟦X⟧) f := by
